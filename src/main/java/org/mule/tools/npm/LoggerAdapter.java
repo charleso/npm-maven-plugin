@@ -98,7 +98,7 @@ public class LoggerAdapter implements Logger {
         return threshold;
     }
 
-    @Override
+    // Maven 3.x only
     public void setThreshold(int threshold) {
         this.threshold = threshold;
     }
