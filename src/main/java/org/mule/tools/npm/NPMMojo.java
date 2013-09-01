@@ -12,6 +12,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Goal that offers Recess support in Maven builds.
@@ -29,18 +31,24 @@ public class NPMMojo extends AbstractJavascriptMojo {
     private File outputDirectory;
 
     /**
-     * The identifiers of the packages to download. Use the following syntax: package:version
+     * Package file which declares the dependencies.
      *
-     * @parameter expression="${recess.packages}
-     * @required
+     * @parameter expression="${recess.inputFile}" default-value="${basedir}/package.json"
      */
-    private String [] packages;
+    private File inputFile;
 
     public void execute() throws MojoExecutionException {
         Log log = getLog();
 
-        for (String aPackage : packages) {
-            NPMModule.fromQueryString(log,aPackage).saveToFileWithDependencies(outputDirectory);
+        Map<String, String> dependencies;
+        try {
+            dependencies = (Map<String, String>) NPMModule.downloadMetadata(inputFile.toURI().toURL()).get("dependencies");
+        } catch (IOException e) {
+            throw new MojoExecutionException("Could not open " + inputFile, e);
+        }
+
+        for (Map.Entry<String, String> dependency : dependencies.entrySet()) {
+            NPMModule.fromNameAndVersion(log,dependency.getKey(),dependency.getValue()).saveToFileWithDependencies(outputDirectory);
         }
     }
 }
