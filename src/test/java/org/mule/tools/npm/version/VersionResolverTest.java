@@ -10,15 +10,13 @@ package org.mule.tools.npm.version;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
-import org.mule.tools.npm.NPMModule;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mule.tools.npm.NPMMojo.NPM_URL;
 
 public class VersionResolverTest {
 
@@ -40,7 +38,7 @@ public class VersionResolverTest {
 
     @Test
     public void testGetNextVersion() throws Exception {
-        VersionResolver versionResolver = new VersionResolver();
+        VersionResolver versionResolver = new VersionResolver(NPM_URL);
 
         String debugVersion = versionResolver.getNextVersion(mock(Log.class), "debug", "*");
         assertNotNull(debugVersion);

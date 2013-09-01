@@ -23,6 +23,8 @@ import java.util.Map;
  */
 public class NPMMojo extends AbstractJavascriptMojo {
 
+    public static String NPM_URL = "http://registry.npmjs.org/%s/%s";
+
     /**
      * Where the resulting files will be downloaded.
      *
@@ -37,6 +39,13 @@ public class NPMMojo extends AbstractJavascriptMojo {
      */
     private File inputFile;
 
+    /**
+     * Override URL to download packages from.
+     *
+     * @parameter expression="${recess.registryUrl}" default-value="http://registry.npmjs.org/%s/%s"
+     */
+    private String registryUrl;
+
     public void execute() throws MojoExecutionException {
         Log log = getLog();
 
@@ -48,7 +57,7 @@ public class NPMMojo extends AbstractJavascriptMojo {
         }
 
         for (Map.Entry<String, String> dependency : dependencies.entrySet()) {
-            NPMModule.fromNameAndVersion(log,dependency.getKey(),dependency.getValue()).saveToFileWithDependencies(outputDirectory);
+            NPMModule.fromNameAndVersion(registryUrl,log,dependency.getKey(),dependency.getValue()).saveToFileWithDependencies(outputDirectory);
         }
     }
 }

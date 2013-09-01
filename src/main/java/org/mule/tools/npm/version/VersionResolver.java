@@ -24,6 +24,12 @@ public class VersionResolver {
     public static final String VERSION_REGEX = "(?:(\\*)|" +
             VERSION_WITH_SIGN_REGEX + VERSION_WITH_SIGN_REGEX + "?)";
 
+    private final String npmUrl;
+
+    public VersionResolver(String npmUrl) {
+        this.npmUrl = npmUrl;
+    }
+
     private String removeXFromVersion(String leftVersion) {
         int xPosition = leftVersion.indexOf("x");
         if ( xPosition != -1 ) {
@@ -43,7 +49,7 @@ public class VersionResolver {
                     versionRange + " of " + dependencyName );
         }
 
-        Set set = NPMModule.downloadMetadataList(dependencyName);
+        Set set = NPMModule.downloadMetadataList(npmUrl, dependencyName);
 
         /* Case where '*' */
         if ("*".equals(matcher.group())) {

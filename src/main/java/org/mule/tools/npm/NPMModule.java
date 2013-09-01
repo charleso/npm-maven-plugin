@@ -28,12 +28,12 @@ import java.util.Set;
 
 public class NPMModule {
 
-    private static String NPM_URL = "http://registry.npmjs.org/%s/%s";
     private String name;
     public String version;
     private Log log;
     private List<NPMModule> dependencies;
     private URL downloadURL;
+    private String npmURL;
 
     public String getName() {
         return name;
@@ -143,25 +143,28 @@ public class NPMModule {
             String version = ((String) dependency.getValue());
 
             try {
-                version = new VersionResolver().getNextVersion(log, dependencyName, version);
-                dependencies.add(fromNameAndVersion(log, dependencyName, version));
+                version = new VersionResolver(npmURL).getNextVersion(log, dependencyName, version);
+                dependencies.add(fromNameAndVersion(npmURL, log, dependencyName, version));
             } catch (Exception e) {
                 throw new RuntimeException("Error resolving dependency: " +
-                        dependencyName + ":" + version + " not found.");
+                        dependencyName + ":" + version + " not found.", e);
             }
 
         }
     }
 
-    public static Set downloadMetadataList(String name) throws IOException, JsonParseException {
-        URL dl = new URL(String.format(NPM_URL,name,""));
+    public static Set downloadMetadataList(String npmURL, String name) throws IOException, JsonParseException {
+        URL dl = new URL(String.format(npmURL,name,""));
         ObjectMapper objectMapper = new ObjectMapper();
         Map allVersionsMetadata = objectMapper.readValue(dl,Map.class);
         return ((Map) allVersionsMetadata.get("versions")).keySet();
     }
 
     private Map downloadMetadata(String name, String version) throws IOException, JsonParseException {
-        URL dl = new URL(String.format(NPM_URL,name,version != null ? version : "latest"));
+        return downloadMetadata(new URL(String.format(npmURL,name,version != null ? version : "latest")));
+    }
+
+    public static Map downloadMetadata(URL dl) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(dl, Map.class);
@@ -200,17 +203,19 @@ public class NPMModule {
         }
     }
 
-    private NPMModule() {}
-
-    public static NPMModule fromQueryString(Log log, String nameAndVersion) throws MojoExecutionException {
-        String[] splitNameAndVersion = nameAndVersion.split(":");
-        return fromNameAndVersion(log, splitNameAndVersion[0], splitNameAndVersion[1]);
+    private NPMModule(String npmURL) {
+        this.npmURL = npmURL;
     }
 
-    public static NPMModule fromNameAndVersion(Log log, String name, String version)
+    public static NPMModule fromQueryString(String npmURL, Log log, String nameAndVersion) throws MojoExecutionException {
+        String[] splitNameAndVersion = nameAndVersion.split(":");
+        return fromNameAndVersion(npmURL, log, splitNameAndVersion[0], splitNameAndVersion[1]);
+    }
+
+    public static NPMModule fromNameAndVersion(String npmUrl, Log log, String name, String version)
             throws IllegalArgumentException,
             MojoExecutionException {
-        NPMModule module = new NPMModule();
+        NPMModule module = new NPMModule(npmUrl);
         module.log = log;
         module.name = name;
 
@@ -228,8 +233,8 @@ public class NPMModule {
         return downloadURL;
     }
 
-    public static NPMModule fromName(Log log, String name) throws MojoExecutionException {
-        return fromNameAndVersion(log, name, null);
+    public static NPMModule fromName(String npmURL, Log log, String name) throws MojoExecutionException {
+        return fromNameAndVersion(npmURL, log, name, null);
     }
 
 }
