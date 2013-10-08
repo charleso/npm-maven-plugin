@@ -40,23 +40,23 @@ public class VersionResolverTest {
     public void testGetNextVersion() throws Exception {
         VersionResolver versionResolver = new VersionResolver(NPM_URL);
 
-        String debugVersion = versionResolver.getNextVersion(mock(Log.class), "debug", "*");
+        String debugVersion = versionResolver.getNextVersion(mock(Log.class), null, "debug", "*");
         assertNotNull(debugVersion);
         assertFalse("*".equals(debugVersion));
 
-        String abbrevVersion = versionResolver.getNextVersion(mock(Log.class), "abbrev", "1");
+        String abbrevVersion = versionResolver.getNextVersion(mock(Log.class), null, "abbrev", "1");
         assertNotNull(abbrevVersion);
         assertFalse("1".equals(abbrevVersion));
 
-        String coffeeScriptVersion = versionResolver.getNextVersion(mock(Log.class), "coffee-script", "~1.3.3");
+        String coffeeScriptVersion = versionResolver.getNextVersion(mock(Log.class), null, "coffee-script", "~1.3.3");
         assertNotNull(coffeeScriptVersion);
         assertEquals("1.3.3", coffeeScriptVersion);
 
-        String sequenceVersion = versionResolver.getNextVersion(mock(Log.class), "sequence", ">= 2.2.1");
+        String sequenceVersion = versionResolver.getNextVersion(mock(Log.class), null, "sequence", ">= 2.2.1");
         assertNotNull(sequenceVersion);
         assertEquals("2.2.1", sequenceVersion);
 
-        String wordwrapVersion = versionResolver.getNextVersion(mock(Log.class), "wordwrap", ">=0.0.1 <0.1.0");
+        String wordwrapVersion = versionResolver.getNextVersion(mock(Log.class), null, "wordwrap", ">=0.0.1 <0.1.0");
         assertNotNull(wordwrapVersion);
         assertEquals("0.0.1", wordwrapVersion);
 

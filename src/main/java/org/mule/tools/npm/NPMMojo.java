@@ -10,6 +10,7 @@ package org.mule.tools.npm;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.settings.Settings;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,18 +47,27 @@ public class NPMMojo extends AbstractJavascriptMojo {
      */
     private String registryUrl;
 
+    /**
+     * The Maven Settings.
+     * 
+     * @parameter default-value="${settings}"
+     * @required
+     * @readonly
+     */
+    private Settings settings;
+
     public void execute() throws MojoExecutionException {
         Log log = getLog();
 
         Map<String, String> dependencies;
         try {
-            dependencies = (Map<String, String>) NPMModule.downloadMetadata(inputFile.toURI().toURL()).get("dependencies");
+            dependencies = (Map<String, String>) NPMModule.downloadMetadata(inputFile.toURI().toURL(), settings.getActiveProxy()).get("dependencies");
         } catch (IOException e) {
             throw new MojoExecutionException("Could not open " + inputFile, e);
         }
 
         for (Map.Entry<String, String> dependency : dependencies.entrySet()) {
-            NPMModule.fromNameAndVersion(registryUrl,log,dependency.getKey(),dependency.getValue()).saveToFileWithDependencies(outputDirectory);
+            NPMModule.fromNameAndVersion(registryUrl,settings.getActiveProxy(),log,dependency.getKey(),dependency.getValue()).saveToFileWithDependencies(outputDirectory);
         }
     }
 }

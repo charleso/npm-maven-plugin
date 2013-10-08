@@ -10,6 +10,7 @@ package org.mule.tools.npm.version;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.settings.Proxy;
 import org.mule.tools.npm.NPMModule;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class VersionResolver {
         return leftVersion;
     }
 
-    public String getNextVersion(Log log, String dependencyName, String versionRange)
+    public String getNextVersion(Log log, Proxy proxy, String dependencyName, String versionRange)
             throws IOException, MojoExecutionException {
         Pattern pattern = Pattern.compile(VERSION_REGEX);
         Matcher matcher = pattern.matcher(versionRange);
@@ -49,7 +50,7 @@ public class VersionResolver {
                     versionRange + " of " + dependencyName );
         }
 
-        Set set = NPMModule.downloadMetadataList(npmUrl, dependencyName);
+        Set set = NPMModule.downloadMetadataList(npmUrl, proxy, dependencyName);
 
         /* Case where '*' */
         if ("*".equals(matcher.group())) {
